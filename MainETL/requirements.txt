@@ -1,0 +1,6 @@
+os
+psycopg2
+psycopg2-binary
+importlib
+traceback
+dotenv import load_dotenv
