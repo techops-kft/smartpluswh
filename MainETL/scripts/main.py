@@ -5,6 +5,8 @@ import traceback
 from dotenv import load_dotenv
 from dim_socios import insertar_socios
 import time
+import requests
+from decimal import Decimal
 
 inicio = time.time()  # Marca de tiempo inicial
 
@@ -47,7 +49,9 @@ plan_ejecucion = [
     {"modulo": "fact_membresias", "funcion": "insertar_membresias", "dependencia": ["dim_socios"], "ejecucion": None},
     #{"modulo": "fact_membresias", "funcion": "actualizar_membresias", "dependencia": [], "ejecucion": None},
     {"modulo": "hist_membresias", "funcion": "insertar_hist_membresias", "dependencia": [], "ejecucion": None},
-    {"modulo": "hist_rangos", "funcion": "insertar_hist_rangos", "dependencia": [], "ejecucion": None}
+    {"modulo": "hist_rangos", "funcion": "insertar_hist_rangos", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_transacciones_internas", "funcion": "insertar_transacciones_internas", "dependencia": [], "ejecucion": None},
+    {"modulo": "dim_wallets", "funcion": "insertar_wallets", "dependencia": [], "ejecucion": None}
 ]
 
 try:

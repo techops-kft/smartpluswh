@@ -85,6 +85,11 @@ def insertar_socios(cur_origen, conn_origen, cur_destino, conn_destino):
         else:
             print("No hay nuevos socios por insertar.")
 
+        socios_origen = None
+        socios_destino = None
+        valores = None
+        nuevos_socios = None
+
         return {
             "estatus": "success",
             "tabla": "dim_socios",
@@ -270,6 +275,11 @@ def actualizar_socios(cur_origen, conn_origen, cur_destino, conn_destino):
             print("\n\nSe han actualizado los socios con tabla temporal.")
         else:
             print("No hay socios para actualizar.")
+
+        socios_origen = None
+        socios_destino = None
+        mapa_destino = None
+        socios_diferentes = None
 
         return {
             "estatus": "success",

@@ -74,6 +74,10 @@ def insertar_retiros(cur_origen, conn_origen, cur_destino, conn_destino):
         else:
             print("No hay nuevos retiros por insertar.")    
 
+        retiros_origen = None
+        retiros_destino = None
+        nuevos_retiros = None
+
         return {
             "estatus": "success",
             "tabla": "fact_retiros",
@@ -159,6 +163,13 @@ def actualizar_retiros(cur_origen, conn_origen, cur_destino, conn_destino):
         
         registros_insertados = len(actualizados)
         print(f"Se han actualizado {registros_insertados} retiros.\n")
+
+        retiros_origen = None
+        retiros_destino = None
+        mapa_destino = None
+        fechas_destino = None
+        values = None
+        actualizados = None
 
         return {
             "estatus": "success",

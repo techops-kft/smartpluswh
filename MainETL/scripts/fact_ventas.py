@@ -63,7 +63,7 @@ def insertar_planes(cur_origen, conn_origen, cur_destino, conn_destino):
                 FROM socio_productos sp
                 LEFT JOIN compras c
                     ON c.compra = sp.compra
-                WHERE sp.fecha_compra::date > '2024-12-31'
+                WHERE sp.fecha_compra::date > '2024-12-31' and sp.plan_base is null
                 ORDER BY sp.fecha_compra ASC;
         """)
 
@@ -111,6 +111,9 @@ def insertar_planes(cur_origen, conn_origen, cur_destino, conn_destino):
 
         conn_destino.commit()
         print(f"\n\nSe han insertado {registros_insertados} planes correctamente.")
+
+        registros = None
+        valores = None
 
         return {
             "estatus": "success",
