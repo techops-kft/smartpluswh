@@ -61,7 +61,7 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
             FROM compras c
             LEFT JOIN productos p on c.tipo_item = p.producto
             LEFT JOIN promociones promo on c.promocion = promo.promocion
-            WHERE c.tipo_item = 1
+            WHERE c.tipo_item = 1 and c.estatus = 6 and c.es_complementario is null
             ORDER BY c.fecha_insert ASC;
         """)
 
