@@ -3,6 +3,12 @@ from psycopg2.extras import execute_values
 
 def insertar_anualidades(cur_origen, conn_origen, cur_destino, conn_destino):
     try:
+        #----------EXTRACT DATA
+        # 0. Obtener todos los registros del origen y borrar registros
+        cur_destino.execute("""
+            DELETE FROM fact_anualidades
+        """)
+        print("Datos eliminados correctamente de la tabla fact_anualidades.")
         
         # --------- EXTRACT DATA
         # 1. Obtener todos los IDS de compra del origen
