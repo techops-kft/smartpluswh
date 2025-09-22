@@ -9,6 +9,7 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
             DELETE FROM fact_membresias
         """)
         print("Datos eliminados correctamente de la tabla fact_membresias.")
+        
         # ------ EXTRACT DATA
         # 1. Obtener todos los IDS de compra del origen
         cur_origen.execute("""
