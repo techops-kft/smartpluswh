@@ -51,7 +51,9 @@ plan_ejecucion = [
     {"modulo": "hist_membresias", "funcion": "insertar_hist_membresias", "dependencia": [], "ejecucion": None},
     {"modulo": "hist_rangos", "funcion": "insertar_hist_rangos", "dependencia": [], "ejecucion": None},
     {"modulo": "fact_transacciones_internas", "funcion": "insertar_transacciones_internas", "dependencia": [], "ejecucion": None},
-    {"modulo": "dim_wallets", "funcion": "insertar_wallets", "dependencia": [], "ejecucion": None}
+    {"modulo": "dim_wallets", "funcion": "insertar_wallets", "dependencia": [], "ejecucion": None},
+    {"modulo": "agg_fact_anualidades", "funcion": "actualizar_agg_fact_anualidades", "dependencia": [], "ejecucion": None},
+    {"modulo": "agg_fact_membresias", "funcion": "actualizar_agg_fact_membresias", "dependencia": [], "ejecucion": None}
 ]
 
 try:
