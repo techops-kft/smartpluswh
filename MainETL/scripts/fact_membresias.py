@@ -3,6 +3,12 @@ from psycopg2.extras import execute_values
 
 def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
     try:
+        #----------EXTRACT DATA
+        # 0. Obtener todos los registros del origen y borrar registros
+        cur_destino.execute("""
+            DELETE FROM fact_membresias
+        """)
+        print("Datos eliminados correctamente de la tabla fact_membresias.")
         # ------ EXTRACT DATA
         # 1. Obtener todos los IDS de compra del origen
         cur_origen.execute("""
