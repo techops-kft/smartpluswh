@@ -3,19 +3,30 @@ from psycopg2.extras import execute_values
 
 def insertar_masterbonus(cur_origen, conn_origen, cur_destino, conn_destino):
     try:
-        #----------EXTRACT DATA
-        # 1. Obtener todos los registros del origen
+        # ---------- EXTRACT DATA
         print('Obteniendo registros de origen...')
         cur_origen.execute("""
-            SELECT pago, socio, monto, monto_pagado_btc, cotiza_btc, estatus,
-                   fecha, fecha_pago, fecha_pagado, fecha_cancelacion, defi
+            SELECT 
+                pago, 
+                socio, 
+                monto, 
+                monto_pagado_btc, 
+                cotiza_btc, 
+                estatus,
+                fecha, 
+                fecha_pago, 
+                fecha_pagado, 
+                fecha_cancelacion, 
+                defi,
+                CASE WHEN mtd_dsp = 2 THEN 'CNKT' ELSE 'BTC' END AS moneda,
+                CASE WHEN pago_tx IS NOT NULL THEN pago_tx::integer ELSE NULL END AS pago_tx
             FROM pagos 
             WHERE tipo = 4;
         """)
         registros_origen = cur_origen.fetchall()
         print(f"Registros origen: {len(registros_origen)}")
 
-        # 2. Obtener registros destino
+        # ---------- DESTINO
         print('Obteniendo registros de destino...')
         cur_destino.execute("""
             SELECT id_masterbonus FROM fact_masterbonus;
@@ -23,13 +34,10 @@ def insertar_masterbonus(cur_origen, conn_origen, cur_destino, conn_destino):
         ids_destino = set(row[0] for row in cur_destino.fetchall())
         print(f"Registros destino: {len(ids_destino)}")
 
-        # ----------TRANSFORM DATA
-        # Los valores que existen en origen pero NO en destino se tomarán como valores a insertar
-        # 3. Filtrar solo los registros que no están en destino
+        # ---------- TRANSFORM
         print('Transformando datos para la inserción SQL...')
         registros_nuevos = [r for r in registros_origen if r[0] not in ids_destino]
 
-        # 4. Preparar los valores para insertarlos
         valores_a_insertar = [
             (
                 r[0],  # id_masterbonus (pago)
@@ -42,19 +50,21 @@ def insertar_masterbonus(cur_origen, conn_origen, cur_destino, conn_destino):
                 r[7].date() if r[7] else None, r[7].date() if r[7] else None,  # fecha_pago_estimada, fk_fecha_pago_estimada
                 r[8].date() if r[8] else None, r[8].date() if r[8] else None,  # fecha_pagado, fk_fecha_pagado
                 r[9].date() if r[9] else None, r[9].date() if r[9] else None,  # fecha_cancelacion, fk_fecha_cancelacion
-                r[10]  # defi
+                r[10], # defi
+                r[11], # moneda
+                r[12]  # pago_tx
             )
             for r in registros_nuevos
         ]
 
-        # ----------LOAD DATA
+        # ---------- LOAD
         print('Iniciando inserción SQL..')
-        # 5. Ejecutar insert masivo en caso de que sí existan valores a insertar 
         sql = """
             INSERT INTO fact_masterbonus (
                 id_masterbonus, id_socio, monto, monto_pagado_cripto, cotiza_cripto, estatus,
                 fecha_solicitud, fk_fecha_solicitud, fecha_pago_estimada, fk_fecha_pago_estimada,
-                fecha_pagado, fk_fecha_pagado, fecha_cancelacion, fk_fecha_cancelacion, defi
+                fecha_pagado, fk_fecha_pagado, fecha_cancelacion, fk_fecha_cancelacion, defi,
+                moneda, pago_tx
             ) VALUES %s
         """
 
@@ -83,7 +93,7 @@ def insertar_masterbonus(cur_origen, conn_origen, cur_destino, conn_destino):
             "registros_insertados": 0,
             "error_text": str(e)
         }
-    
+
 def actualizar_masterbonus(cur_origen, conn_origen, cur_destino, conn_destino):
     try:
                 
