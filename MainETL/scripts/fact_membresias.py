@@ -9,7 +9,7 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
             DELETE FROM fact_membresias
         """)
         print("Datos eliminados correctamente de la tabla fact_membresias.")
-        
+
         # ------ EXTRACT DATA
         # 1. Obtener todos los IDS de compra del origen
         cur_origen.execute("""
@@ -32,6 +32,9 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
                     when  c.forma_pago= 5 then 'Polygon - BTC'
                     when  c.forma_pago= 7 then 'Polygon - USDT'
                     when  c.forma_pago= 8 then 'FIAT - STRIPE'
+                    when  c.forma_pago=10 then 'LINK PAGO - OPENPAY'
+                    when  c.forma_pago=11 then 'LINK PAGO - PAYONEER'
+                    when c.forma_pago in (6, 9) and c.entidad_pago = 1 and (c.referencia2 is not null or c.referencia2 <> '012180001156091786') then 'FIAT - TRX - STP'
                     else 'x'
                 END AS forma_pago,
                 CASE
@@ -49,8 +52,8 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
                 p.nombre AS tipo_plan,
                 p.nombre AS tipo_smartpack,
                 CASE
-                    when c.tipo_item = 1 then 'Membresia'
-                    when c.tipo_item = 1 AND c.prospecto IS NULL then 'Membresia Zero'
+                    when c.socio is not null and c.tipo_item = 1 then 'Membresia'
+                    when  c.prospecto is not NULL and c.tipo_item = 1 then 'Membresia Zero'
                 END AS tipo_producto,
                 c.precio,
                 c.moneda,
@@ -69,7 +72,7 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
             LEFT JOIN productos p on c.tipo_item = p.producto
             LEFT JOIN promociones promo on c.promocion = promo.promocion
             WHERE c.tipo_item = 1 and c.estatus = 6 and c.es_complementario is null
-            ORDER BY c.fecha_insert ASC;
+            ORDER BY c.fecha_insert ASC
         """)
 
         compras_origen = cur_origen.fetchall()
