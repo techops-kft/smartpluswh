@@ -46,6 +46,7 @@ def insertar_anualidades(cur_origen, conn_origen, cur_destino, conn_destino):
                         when c.forma_pago = 7 then 'Polygon - USDT'
                         when c.forma_pago = 8 then 'FIAT - STRIPE'
                         when c.forma_pago= 10 then 'LINK PAGO - OPENPAY'
+                        when c.forma_pago in (6, 9) and c.entidad_pago = 1 and (c.referencia2 is not null or c.referencia2 <> '012180001156091786') then 'FIAT - TRX - STP'
                         else 'x'
                 END AS forma_pago,
                 CASE
