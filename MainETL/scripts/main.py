@@ -53,7 +53,24 @@ plan_ejecucion = [
     {"modulo": "fact_transacciones_internas", "funcion": "insertar_transacciones_internas", "dependencia": [], "ejecucion": None},
     {"modulo": "dim_wallets", "funcion": "insertar_wallets", "dependencia": [], "ejecucion": None},
     {"modulo": "agg_fact_anualidades", "funcion": "actualizar_agg_fact_anualidades", "dependencia": [], "ejecucion": None},
-    {"modulo": "agg_fact_membresias", "funcion": "actualizar_agg_fact_membresias", "dependencia": [], "ejecucion": None}
+    {"modulo": "agg_fact_membresias", "funcion": "actualizar_agg_fact_membresias", "dependencia": [], "ejecucion": None},
+    {"modulo": "agg_planes", "funcion": "insertar_agg_planes", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_bonos_comisiones", "funcion": "insertar_fact_bonos_comisiones", "dependencia": ["dim_socios"], "ejecucion": None},
+    {"modulo": "agg_bonos", "funcion": "insertar_agg_bonos_comisiones", "dependencia": ["fact_bonos_comisiones"], "ejecucion": None},
+    {"modulo": "fact_planes_adicionales_selected", "funcion": "insertar_planes_adicionales", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_cliente_liabilities", "funcion": "insertar_cliente_liabilities", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_cliente_porcentajes_pago", "funcion": "upsert_cliente_porcentajes_pago", "dependencia": [], "ejecucion": None},
+    {"modulo": "aum_pass", "funcion": "insertar_aum_pass", "dependencia": [], "ejecucion": None},
+    {"modulo": "aum_bonos", "funcion": "insertar_aum_bonos", "dependencia": [], "ejecucion": None},
+    {"modulo": "aum_bonos_select", "funcion": "insertar_aum_bonos_select", "dependencia": [], "ejecucion": None},
+    {"modulo": "aum_bonos_select_actual", "funcion": "insertar_aum_bonos_select_actual", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_kft_compras_planes", "funcion": "insertar_kft_compras_planes", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_kft_pagos_planes", "funcion": "insertar_kft_pagos_planes", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_recompra_planes", "funcion": "insertar_recompra_planes", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_porcentajes_anualidades", "funcion": "insertar_porcentajes_anualidades", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_balance", "funcion": "insertar_fact_balance", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_conciliacion_ventas", "funcion": "insertar_fact_conciliacion_ventas", "dependencia": [], "ejecucion": None},
+    {"modulo": "fact_conciliacion_pagos", "funcion": "insertar_fact_conciliacion_pagos", "dependencia": [], "ejecucion": None},
 ]
 
 try:
