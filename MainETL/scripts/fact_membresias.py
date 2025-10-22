@@ -52,8 +52,8 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
                 p.nombre AS tipo_plan,
                 p.nombre AS tipo_smartpack,
                 CASE
-                    when c.socio is not null and c.tipo_item = 1 then 'Membresia'
-                    when  c.prospecto is not NULL and c.tipo_item = 1 then 'Membresia Zero'
+                    when c.socio is not null and c.tipo_item = 1 then 'Membresia Zero'
+                    when c.prospecto is not NULL and c.tipo_item = 1 then 'Membresia'
                 END AS tipo_producto,
                 c.precio,
                 c.moneda,
