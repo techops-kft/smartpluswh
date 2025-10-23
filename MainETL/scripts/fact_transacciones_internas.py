@@ -50,10 +50,6 @@ def insertar_transacciones_internas(cur_origen, conn_origen, cur_destino, conn_d
             execute_values(cur_destino, insert_query, registros_nuevos)
             conn_destino.commit()
 
-        registros_nuevos = None
-        registros_existentes = None
-        data = None
-
         return {
             "estatus": "success",
             "tabla": "fact_transacciones_internas",
