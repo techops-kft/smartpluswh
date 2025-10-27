@@ -3,37 +3,34 @@ from psycopg2.extras import execute_values
 import json
 import requests
 from decimal import Decimal
-from dateutil.parser import parser
-from dateutil.parser import parse as parse_date
-    
+from dateutil import parser
+
+
 def insertar_kft_compras_planes(cur_origen, conn_origen, cur_destino, conn_destino):
     try:
-
-        # ------ EXTRACT DATA
-        #1. codigo de extraccción (API) para obtener todos los registros del origen
-
+        # =========================================================
+        # 1️⃣ EXTRACT DATA desde la API de Bubble
+        # =========================================================
         url = "https://products.konfront.mx/api/1.1/obj/compras_smart"
         token = "9d54cb1bdacbf694837ac0d286445f76"
 
-        # Headers con autenticación Bearer
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
         }
 
-        # Parámetros (constraints para fechas)
         constraints = [
-            {"key":"Created Date","constraint_type":"greater than","value":"2025-01-01"},
-            {"key":"Created Date","constraint_type":"less than","value":"2050-09-17"},
+            {"key": "Created Date", "constraint_type": "greater than", "value": "2025-01-01"},
+            {"key": "Created Date", "constraint_type": "less than", "value": "2050-09-17"},
             {"sort_field": "Created Date", "descending": "false"},
-            {"key":"Fecha_pago","constraint_type":"is_not_empty","value":"yes"}
+            {"key": "Fecha_pago", "constraint_type": "is_not_empty", "value": "yes"}
         ]
 
         limit = 100
         cursor = 0
         todos_registros = []
 
-        # ------ EXTRACT DATA con cursor
+        # Cursor loop para traer todos los registros
         while True:
             params = {
                 "constraints": json.dumps(constraints),
@@ -41,67 +38,89 @@ def insertar_kft_compras_planes(cur_origen, conn_origen, cur_destino, conn_desti
                 "cursor": cursor
             }
 
-        # Hacer la petición GET
             response = requests.get(url, headers=headers, params=params)
             if response.status_code != 200:
                 print(f"Error {response.status_code}: {response.text}")
                 break
 
-        # Mostrar la respuesta
             registros = response.json()["response"]["results"]
             print(f"Cursor {cursor}, registros obtenidos: {len(registros)}")
             todos_registros.extend(registros)
 
             if len(registros) < limit:
-                break  # no hay más registros
+                break
             cursor += limit
 
         print(f"Total registros obtenidos: {len(todos_registros)}")
 
-        #2. conexion a base de datos destino postgress para obtener registros destino
+        # =========================================================
+        # 2️⃣ OBTENER REGISTROS EXISTENTES EN DESTINO
+        # =========================================================
         print('Obteniendo registros de destino...')
         cur_destino.execute("SELECT id_compra FROM fact_kft_compras_planes;")
         ids_destino = set(row[0] for row in cur_destino.fetchall())
         print(f"Registros destino: {len(ids_destino)}")
 
-        # ------- TRANSFORM DATA
-        # Los valores que existen en origen pero NO en destino se tomarán como valores a insertar
-        # 3. Filtrar solo los registros que no están en destino
-        # codigo de transformacion de datos
+        # =========================================================
+        # 3️⃣ TRANSFORMACIÓN DE DATOS
+        # =========================================================
         print('Transformando datos para la inserción SQL...')
-        registros_nuevos = [r for r in todos_registros if int(r["id_compra"][2:]) not in ids_destino]
 
+        # Filtrar registros nuevos (no existentes en destino)
+        registros_nuevos = [
+            r for r in todos_registros
+            if int(r["id_compra"][2:]) not in ids_destino
+        ]
 
-        # 4. Preparar los valores para insertarlos
+        # --- Crear diccionario _id → id_compra_numérico para resolver complementos ---
+        id_map = {
+            r["_id"]: int(r["id_compra"][2:])
+            for r in todos_registros
+            if r.get("_id") and r.get("id_compra")
+        }
+        print(f"Diccionario de referencia generado con {len(id_map)} registros.")
+
+        # --- Preparar los valores para insertar ---
         valores_a_insertar = []
         for r in registros_nuevos:
             try:
-                complemento_de = int(r["complemento_de"][2:]) if r.get("complemento_de") else None
-            except:
+                complemento_de = None
+                if "complemento_de" in r and r["complemento_de"]:
+                    # Puede venir como dict o string
+                    if isinstance(r["complemento_de"], dict):
+                        ref_id = r["complemento_de"].get("_id")
+                    else:
+                        ref_id = r["complemento_de"]
+
+                    # Buscar el id_compra correspondiente en el mapa
+                    complemento_de = id_map.get(ref_id)
+
+            except Exception as e:
+                print(f"Error procesando complemento_de para {r.get('id_compra')}: {e}")
                 complemento_de = None
 
             try:
                 fecha_pago = parser.parse(r["Fecha_pago"]) if r.get("Fecha_pago") else None
-            except:
+            except Exception:
                 fecha_pago = None
 
             valores_a_insertar.append((
-                int(r["id_compra"][2:]),                  # id_compra
-                r.get("address", None),                    # address
-                Decimal(r["cantidad"]) if r.get("cantidad") else None, #cantidad
-                Decimal(r["Monto_recibido"]) if r.get("Monto_recibido") else None, #monto_recibido
-                r.get("status", None),                     # status
-                r.get("Fecha_pago", None),                 # fecha_pago
-                r.get("coin", None),                       # coin
-                complemento_de,                            # complemento_de
-                Decimal(r["USD"]) if r.get("USD") else None,  # usd
-                r.get("wallet", None)                      # wallet
+                int(r["id_compra"][2:]),                     # id_compra
+                r.get("address"),                            # address
+                Decimal(r["cantidad"]) if r.get("cantidad") else None,  # cantidad
+                Decimal(r["Monto_recibido"]) if r.get("Monto_recibido") else None,  # monto_recibido
+                r.get("status"),                             # status
+                fecha_pago,                                  # fecha_pago
+                r.get("coin"),                               # coin
+                complemento_de,                              # complemento_de traducido
+                Decimal(r["USD"]) if r.get("USD") else None, # usd
+                r.get("wallet")                              # wallet
             ))
 
-        # ------- LOAD DATA
-        print('Iniciando inserción SQL..')
-        # 5. Ejecutar insert masivo en caso de que sí existan valores a insertar
-        # codigo de carga de datos (usar funcion execute_values de psycopg2)
+        # =========================================================
+        # 4️⃣ LOAD DATA — Inserción masiva
+        # =========================================================
+        print('Iniciando inserción SQL...')
         registros_insertados = 0
         if valores_a_insertar:
             insert_sql = """
@@ -112,10 +131,13 @@ def insertar_kft_compras_planes(cur_origen, conn_origen, cur_destino, conn_desti
             execute_values(cur_destino, insert_sql, valores_a_insertar)
             conn_destino.commit()
             registros_insertados = len(valores_a_insertar)
-            print(f'¡Se insertaron {registros_insertados} nuevas compras_planes!')
+            print(f'✅ ¡Se insertaron {registros_insertados} nuevas compras_planes!')
         else:
             print("No hay compras_planes nuevos para insertar.")
 
+        # =========================================================
+        # 5️⃣ RESULTADO FINAL
+        # =========================================================
         return {
             "estatus": "success",
             "tabla": "fact_kft_compras_planes",
