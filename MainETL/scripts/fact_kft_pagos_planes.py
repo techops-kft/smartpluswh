@@ -59,16 +59,19 @@ def insertar_kft_pagos_planes(cur_origen, conn_origen, cur_destino, conn_destino
 
         valores_a_insertar = [
             (
-                int(r["id_pago"][2:]) if "id_pago" in r and r["id_pago"] else None,  # ahora mapea a pago_tx
+                int(r["id_pago"][2:]) if "id_pago" in r and r["id_pago"] else None,  # pago_tx
                 Decimal(r["amount"]) if "amount" in r and r["amount"] else None,
-                r.get("Asset", None),
-                r.get("coin", None),
+                r.get("Asset", None),                      # asset
+                r.get("coin", None),                       # coin
                 Decimal(r["cotizacion"]) if "cotizacion" in r and r["cotizacion"] else None,
-                r.get("Estatus", None),
-                r.get("id_tx", None),
-                r.get("id_wallet", None),
-                Decimal(r["USD"]) if "USD" in r and r["USD"] else None,
-                parser.parse(r["Created Date"]) if "Created Date" in r and r["Created Date"] else None
+                r.get("status", None),                     # estatus
+                r.get("id_tx", None),                      # id_tx
+                r.get("id_wallet", None),                  # id_wallet
+                parser.parse(r["Created Date"]) if "Created Date" in r and r["Created Date"] else None,  # created_at
+                r.get("address", None),                    # nueva columna address
+                Decimal(r["amount_cripto"]) if "amount_cripto" in r and r["amount_cripto"] else None,    # nueva columna amount_crypto
+                r.get("moneda", None),                     # nueva columna moneda
+                int(r["socio"]) if "socio" in r and r["socio"] else None  # nueva columna socio
             )
             for r in registros_nuevos
         ]
@@ -78,7 +81,8 @@ def insertar_kft_pagos_planes(cur_origen, conn_origen, cur_destino, conn_destino
         if valores_a_insertar:
             insert_sql = """
                 INSERT INTO fact_kft_pagos_planes (
-                    pago_tx, amount, asset, coin, cotizacion, estatus, id_tx, id_wallet, usd, created_at
+                    pago_tx, amount, asset, coin, cotizacion, estatus, id_tx, id_wallet, created_at,
+                    address, amount_crypto, moneda, socio
                 ) VALUES %s
             """
             execute_values(cur_destino, insert_sql, valores_a_insertar)
