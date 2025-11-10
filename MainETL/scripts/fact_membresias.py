@@ -35,6 +35,7 @@ def insertar_membresias(cur_origen, conn_origen, cur_destino, conn_destino):
                     when  c.forma_pago=10 then 'LINK PAGO - OPENPAY'
                     when  c.forma_pago=11 then 'LINK PAGO - PAYONEER'
                     when c.forma_pago in (6, 9) and c.entidad_pago = 1 and (c.referencia2 is not null or c.referencia2 <> '012180001156091786') then 'FIAT - TRX - STP'
+                    when c.forma_pago = 12 then 'Polygon - CNKT+'
                     else 'x'
                 END AS forma_pago,
                 CASE
