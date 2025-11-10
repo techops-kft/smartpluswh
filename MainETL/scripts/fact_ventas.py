@@ -49,6 +49,7 @@ def insertar_planes(cur_origen, conn_origen, cur_destino, conn_destino):
                     WHEN c.forma_pago = 7 THEN 'Polygon - USDT'
                     WHEN c.forma_pago = 8 THEN 'FIAT - STRIPE'
                     when c.forma_pago in (6, 9) and c.entidad_pago = 1 and (c.referencia2 is not null or c.referencia2 <> '012180001156091786') then 'FIAT - TRX - STP'
+                    when c.forma_pago = 12 then 'Polygon - CNKT+'
                     ELSE 'x'
                 END AS forma_de_pago
             FROM socio_productos sp
